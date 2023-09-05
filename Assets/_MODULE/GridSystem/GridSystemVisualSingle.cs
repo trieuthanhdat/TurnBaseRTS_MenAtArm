@@ -10,9 +10,10 @@ public class GridSystemVisualSingle : MonoBehaviour
     {
         return mesh;
     }
-    public void Show()
+    public void Show(Material material)
     {
         if(mesh) mesh.enabled = true;
+        if(mesh) mesh.material = material;
     }
     public void Hide()
     {

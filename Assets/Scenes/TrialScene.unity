@@ -2641,6 +2641,66 @@ PrefabInstance:
       propertyPath: m_Name
       value: GridVisual
       objectReference: {fileID: 0}
+    - target: {fileID: 4984440609712198438, guid: 7dc26d3ffabb37741b823cbf70e961fc,
+        type: 3}
+      propertyPath: gridVisualTypeMaterials.Array.size
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 4984440609712198438, guid: 7dc26d3ffabb37741b823cbf70e961fc,
+        type: 3}
+      propertyPath: gridVisualTypeMaterials.Array.data[0].material
+      value: 
+      objectReference: {fileID: 2100000, guid: e4cc0618e040ebe48a69d016225f8750, type: 2}
+    - target: {fileID: 4984440609712198438, guid: 7dc26d3ffabb37741b823cbf70e961fc,
+        type: 3}
+      propertyPath: gridVisualTypeMaterials.Array.data[1].material
+      value: 
+      objectReference: {fileID: 2100000, guid: 467aa1df4a61ac846a51041359cf7278, type: 2}
+    - target: {fileID: 4984440609712198438, guid: 7dc26d3ffabb37741b823cbf70e961fc,
+        type: 3}
+      propertyPath: gridVisualTypeMaterials.Array.data[2].material
+      value: 
+      objectReference: {fileID: 2100000, guid: 6cedd46285a23644582d95602e160484, type: 2}
+    - target: {fileID: 4984440609712198438, guid: 7dc26d3ffabb37741b823cbf70e961fc,
+        type: 3}
+      propertyPath: gridVisualTypeMaterials.Array.data[3].material
+      value: 
+      objectReference: {fileID: 2100000, guid: 1816d1195f835f148a2772618e614071, type: 2}
+    - target: {fileID: 4984440609712198438, guid: 7dc26d3ffabb37741b823cbf70e961fc,
+        type: 3}
+      propertyPath: gridVisualTypeMaterials.Array.data[4].material
+      value: 
+      objectReference: {fileID: 2100000, guid: d030fe16aa0379646bff2249c205973b, type: 2}
+    - target: {fileID: 4984440609712198438, guid: 7dc26d3ffabb37741b823cbf70e961fc,
+        type: 3}
+      propertyPath: gridVisualTypeMaterials.Array.data[5].material
+      value: 
+      objectReference: {fileID: 2100000, guid: 81c8834947ba3574f9b93090921bebde, type: 2}
+    - target: {fileID: 4984440609712198438, guid: 7dc26d3ffabb37741b823cbf70e961fc,
+        type: 3}
+      propertyPath: gridVisualTypeMaterials.Array.data[1].gridVisualStyle
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4984440609712198438, guid: 7dc26d3ffabb37741b823cbf70e961fc,
+        type: 3}
+      propertyPath: gridVisualTypeMaterials.Array.data[2].gridVisualStyle
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4984440609712198438, guid: 7dc26d3ffabb37741b823cbf70e961fc,
+        type: 3}
+      propertyPath: gridVisualTypeMaterials.Array.data[3].gridVisualStyle
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4984440609712198438, guid: 7dc26d3ffabb37741b823cbf70e961fc,
+        type: 3}
+      propertyPath: gridVisualTypeMaterials.Array.data[4].gridVisualStyle
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4984440609712198438, guid: 7dc26d3ffabb37741b823cbf70e961fc,
+        type: 3}
+      propertyPath: gridVisualTypeMaterials.Array.data[5].gridVisualStyle
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 6895024814594253561, guid: 7dc26d3ffabb37741b823cbf70e961fc,
         type: 3}
       propertyPath: m_RootOrder

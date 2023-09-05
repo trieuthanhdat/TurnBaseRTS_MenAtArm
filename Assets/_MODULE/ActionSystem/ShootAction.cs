@@ -25,7 +25,10 @@ public class ShootAction : BaseAction
         public UnitControl targetUnit;
         public UnitControl shootingUnit;
     }
-
+    public int GetMaxShootDistance()
+    {
+        return maxShootDistance;
+    }
     public UnitControl GetTargetUnit()
     {
         return targetUnit;
