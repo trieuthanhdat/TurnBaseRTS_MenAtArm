@@ -48,7 +48,7 @@ public class ShootAction : BaseAction
         switch (state)
         {
             case ShootingState.Aim:
-                var aimDir = targetUnit.GetWorldPosition();
+                var aimDir = (targetUnit.GetWorldPosition() - unit.GetWorldPosition()).normalized;
                 transform.forward = Vector3.Lerp(transform.forward, aimDir, rotateSpeed* Time.deltaTime);
                 break;
             case ShootingState.Shoot:
@@ -104,23 +104,27 @@ public class ShootAction : BaseAction
 
     public override List<GridPosition> GetValidActionGridPosition()
     {
+        GridPosition gridPositionUnit = unit.GetGridPosition();
+        return GetValidActionGridPosition(gridPositionUnit);
+    }
+    public List<GridPosition> GetValidActionGridPosition(GridPosition unitGridpos)
+    {
         List<GridPosition> listPos = new List<GridPosition>();
-        GridPosition unitGridpos = unit.GetGridPosition();
         for(int x = -maxShootDistance; x <= maxShootDistance; x ++)
         {
             for(int z = -maxShootDistance; z <= maxShootDistance; z ++)
             {
                 GridPosition offsetGridPos = new GridPosition(x, z);
                 GridPosition testGridpos = unitGridpos + offsetGridPos;
-                int testDist = Mathf.Abs(x) + Mathf.Abs(z);
                 if(!LevelGrid.instance.IsValidGridPosition(testGridpos))
                     continue;
-                if(testDist > maxShootDistance)
+                int tmpDistance = Mathf.Abs(x) + Mathf.Abs(z);
+                if(tmpDistance > maxShootDistance)
                     continue;
                 if(!LevelGrid.instance.HasAnyUnitOnGridPosition(testGridpos))
                     continue;
                 UnitControl targetUnit = LevelGrid.instance.GetUnitOnGridPosition(testGridpos);
-                if(targetUnit.IsEnemy() == unit.IsEnemy()) //Both unit on the same team
+                if(targetUnit.IsEnemy() == unit.IsEnemy())
                     continue;
 
                 listPos.Add(testGridpos);
@@ -128,7 +132,6 @@ public class ShootAction : BaseAction
         }
         return listPos;
     }
-
     public override void TakeAction(GridPosition gridPosition, Action onActionComplete)
     {
         targetUnit = LevelGrid.instance.GetUnitOnGridPosition(gridPosition);
@@ -139,5 +142,19 @@ public class ShootAction : BaseAction
         stateTimer = aimingStateTime;
         ActionStart(onActionComplete);
     }
+    public int GetTargetCountAtPoisition(GridPosition gridPosition)
+    {
+        return GetValidActionGridPosition(gridPosition).Count;
+    }
 
+    public override EnemyAIAction GetEnemyAIAction(GridPosition gridPosition)
+    {
+        UnitControl targetUnit = LevelGrid.instance.GetUnitOnGridPosition(gridPosition);
+
+        return new EnemyAIAction 
+        {
+            gridPosition = gridPosition,
+            actionValue = 100 + ( targetUnit != null ? Mathf.RoundToInt((1- targetUnit.GetHealthProportion()) * 100f) : 0)
+        };
+    }
 }

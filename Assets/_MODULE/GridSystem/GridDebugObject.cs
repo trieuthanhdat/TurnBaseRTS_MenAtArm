@@ -4,8 +4,8 @@ using UnityEngine;
 public class GridDebugObject : MonoBehaviour
 {
     [SerializeField] TextMeshPro txtDebug;
-    private GridObject gridObject;
-    public void SetGridObject(GridObject gridObject)
+    private object gridObject;
+    public virtual void SetGridObject(object gridObject)
     {
         this.gridObject = gridObject;
     }
@@ -13,7 +13,7 @@ public class GridDebugObject : MonoBehaviour
     {
         UpdateTextGridObject();
     }
-    public void UpdateTextGridObject()
+    public virtual void UpdateTextGridObject()
     {
         txtDebug.text = gridObject.ToString();
     }

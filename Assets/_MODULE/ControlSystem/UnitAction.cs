@@ -14,12 +14,11 @@ public class UnitAction : MonoSingleton<UnitAction>
     private UnitControl selectedUnit;
     private BaseAction selectedAction;
     private bool isBusy = false;
-    
 
-    private void Start()
-    {
-        SelectUnit(selectedUnit);
-    }
+    // private void Start()
+    // {
+    //     SelectUnit(selectedUnit);
+    // }
     void Update()
     {
         if(isBusy) return;
@@ -72,7 +71,7 @@ public class UnitAction : MonoSingleton<UnitAction>
     private void SelectUnit(UnitControl unit)
     {
         selectedUnit = unit;
-        SelecteAction(unit.GetMoveAction());
+        SelecteAction(unit.GetAction<MoveAction>());
         OnSelectedUnit?.Invoke(this, EventArgs.Empty);
     }
     public void SelecteAction(BaseAction baseAction)

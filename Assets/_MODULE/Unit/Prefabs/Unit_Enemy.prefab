@@ -7,6 +7,19 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1487492147, guid: 3716f95ae41f2fe4bbf698f36600a57d, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1487492148, guid: 3716f95ae41f2fe4bbf698f36600a57d, type: 3}
+      propertyPath: isEnemy
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1487492150, guid: 3716f95ae41f2fe4bbf698f36600a57d, type: 3}
+      propertyPath: actionSprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 45de8653136b13c4a9ecd7a7de0558f4,
+        type: 3}
     - target: {fileID: 183234997147526035, guid: 3716f95ae41f2fe4bbf698f36600a57d,
         type: 3}
       propertyPath: ragdollPrefab
@@ -46,7 +59,7 @@ PrefabInstance:
     - target: {fileID: 8436571630311343571, guid: 3716f95ae41f2fe4bbf698f36600a57d,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 8436571630311343571, guid: 3716f95ae41f2fe4bbf698f36600a57d,
         type: 3}
@@ -56,7 +69,7 @@ PrefabInstance:
     - target: {fileID: 8436571630311343571, guid: 3716f95ae41f2fe4bbf698f36600a57d,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 8436571630311343571, guid: 3716f95ae41f2fe4bbf698f36600a57d,
         type: 3}
@@ -95,3 +108,51 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3716f95ae41f2fe4bbf698f36600a57d, type: 3}
+--- !u!1 &5013958287804816380 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8436571630311343568, guid: 3716f95ae41f2fe4bbf698f36600a57d,
+    type: 3}
+  m_PrefabInstance: {fileID: 3495234548095245868}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1232081420
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5013958287804816380}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5304d9681daa3194894cfb69d6ab1592, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1232081427
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5013958287804816380}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f4d0533790334d439189556a9c9af9b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  actionSprite: {fileID: 21300000, guid: 7ee48c5fba4919649a8a6094cbead669, type: 3}
+  spinAddAmount: 360
+--- !u!114 &1232081428
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5013958287804816380}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 412d15da94949d04eb0bcfe952ecedce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  actionSprite: {fileID: 21300000, guid: 66cea11fb6a86534ab82d8712d6f782b, type: 3}
+  damageAmount: 40
+  maxShootDistance: 4
+  rotateSpeed: 10

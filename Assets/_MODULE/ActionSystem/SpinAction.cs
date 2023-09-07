@@ -44,6 +44,14 @@ public class SpinAction : BaseAction
     }
     public override int GetActionPointCost()
     {
-        return 2;
+        return 1;
+    }
+    public override EnemyAIAction GetEnemyAIAction(GridPosition gridPosition)
+    {
+        return new EnemyAIAction 
+        {
+            gridPosition = gridPosition,
+            actionValue = 0,
+        };
     }
 }

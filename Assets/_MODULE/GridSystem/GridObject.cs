@@ -1,12 +1,9 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class GridObject
 {
-    private GridSystem gridSystem;
+    private GridSystem<GridObject> gridSystem;
     private GridPosition gridPosition;
     private List<UnitControl> unitList = new List<UnitControl>();
     public List<UnitControl> UnitList () {return unitList;}
@@ -18,7 +15,7 @@ public class GridObject
     {
         unitList.Remove(u);
     }
-    public GridObject(GridSystem gridSystem, GridPosition gridpos)
+    public GridObject(GridSystem<GridObject> gridSystem, GridPosition gridpos)
     {
         this.gridSystem = gridSystem;
         this.gridPosition = gridpos;

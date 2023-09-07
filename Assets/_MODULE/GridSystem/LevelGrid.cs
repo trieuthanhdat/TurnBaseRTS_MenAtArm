@@ -8,12 +8,15 @@ using UnityEngine;
 public class LevelGrid : MonoSingleton<LevelGrid>
 {
     [SerializeField] Transform gridDebugPrefab;
+    [SerializeField] private int width = 10;
+    [SerializeField] private int height = 10;
+    [SerializeField] private float cellSize = 2;
     public event EventHandler onAnyUnitMoveGridPosition;
-    private GridSystem gridSystem;
+    private GridSystem<GridObject> gridSystem;
     private void Awake() 
     {
-        gridSystem = new GridSystem(10, 10, 2f);
-        gridSystem.CreateDebugObjects(gridDebugPrefab);
+        gridSystem = new GridSystem<GridObject>(width, height, cellSize, (GridSystem<GridObject> g, GridPosition gridpos) => new GridObject(g, gridpos));
+        // gridSystem.CreateDebugObjects(gridDebugPrefab);
     }
     public void AddUnitAtGridPosition(GridPosition gridpos, UnitControl unit)
     {

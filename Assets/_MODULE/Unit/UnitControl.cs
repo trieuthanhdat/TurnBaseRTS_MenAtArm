@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class UnitControl : MonoBehaviour
@@ -7,8 +9,8 @@ public class UnitControl : MonoBehaviour
     [SerializeField] private const int MAX_ACTION_POINTS = 2;
     [SerializeField] private bool isEnemy = false;
     public static event EventHandler OnAnyActionChange;
-    private MoveAction moveAction;
-    private SpinAction spinAction;
+    public static event EventHandler OnAnyUnitSpawned;
+    public static event EventHandler OnAnyUnitDead;
     private GridPosition gridPosition;
     private BaseAction[] baseActions;
     private HealthSystem healthSystem;
@@ -16,8 +18,6 @@ public class UnitControl : MonoBehaviour
     
     private void Awake() 
     {
-        moveAction = GetComponent<MoveAction>();
-        spinAction = GetComponent<SpinAction>();
         baseActions =  GetComponents<BaseAction>();
         healthSystem = GetComponent<HealthSystem>();
     }
@@ -27,6 +27,13 @@ public class UnitControl : MonoBehaviour
         LevelGrid.instance.AddUnitAtGridPosition(gridPosition, this);
         TurnSystem.instance.OnTurnChange += TurnSystem_OnTurnChange;
         healthSystem.onDead += HealthSystem_OnDead;
+        StartCoroutine(CoroutineInvokeEvents());
+    }
+    IEnumerator CoroutineInvokeEvents()
+    {
+        while(UnitManager.instance.HasRegisterEvents == false)
+            yield return new WaitForEndOfFrame();
+        OnAnyUnitSpawned?.Invoke(this, EventArgs.Empty);
     }
 
     private void TurnSystem_OnTurnChange(object sender, EventArgs e)
@@ -57,14 +64,18 @@ public class UnitControl : MonoBehaviour
        }
         
     }
-    public MoveAction GetMoveAction()
+    public T GetAction<T>() where T: BaseAction
     {
-        return moveAction;
+        foreach(BaseAction baseAction in baseActions)
+        {
+            if(baseAction is T)
+            {
+                return (T)baseAction;
+            }
+        }
+        return null;
     }
-    public SpinAction GetSpinAction()
-    {
-        return spinAction;
-    }
+    
     public GridPosition GetGridPosition()
     {
         return gridPosition;
@@ -113,5 +124,10 @@ public class UnitControl : MonoBehaviour
     {
         Destroy(gameObject);
         LevelGrid.instance.RemoveUnitAtGridPosition(gridPosition, this);
+        OnAnyUnitDead?.Invoke(this, EventArgs.Empty);
+    }
+    public float GetHealthProportion()
+    {
+        return healthSystem.GetHealthProportion();
     }
 }

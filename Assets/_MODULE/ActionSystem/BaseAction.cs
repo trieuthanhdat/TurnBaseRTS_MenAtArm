@@ -49,4 +49,21 @@ public abstract class BaseAction : MonoBehaviour
     {
         return unit;
     }
+    public EnemyAIAction GetBestAIAction()
+    {
+        List<EnemyAIAction> listEnemyAIs = new List<EnemyAIAction>();
+        List<GridPosition> validGridPositionList = GetValidActionGridPosition();
+        foreach(GridPosition gridPosition in validGridPositionList)
+        {
+            EnemyAIAction enemyAIAction = GetEnemyAIAction(gridPosition);
+            listEnemyAIs.Add(enemyAIAction);
+        }
+        if(listEnemyAIs.Count > 0)
+            listEnemyAIs.Sort((EnemyAIAction a, EnemyAIAction b) => b.actionValue - a.actionValue);
+        else 
+            return null;
+        return listEnemyAIs[0];
+    }
+
+    public abstract EnemyAIAction GetEnemyAIAction(GridPosition gridPosition);
 }
