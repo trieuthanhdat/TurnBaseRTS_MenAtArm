@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class CameraManager : MonoBehaviour
@@ -13,7 +12,7 @@ public class CameraManager : MonoBehaviour
     private void Start() 
     {
         BaseAction.OnAnyActionStarted += BaseAction_OnAnyActionStarted;
-        BaseAction.OnActionCompleted += BaseAction_OnActionCompleted;
+        BaseAction.OnAnyActionCompleted += BaseAction_OnActionCompleted;
         HideActionCamera();
     }
 
@@ -33,7 +32,7 @@ public class CameraManager : MonoBehaviour
         {
             case ShootAction shootAction:
                 UnitControl shooterUnit = shootAction.GetUnit();
-                UnitControl targetUnit = shootAction.GetTargetUnit(); 
+                Target targetUnit = shootAction.GetTargetUnit(); 
                 Vector3 cameraCharacterHeight = Vector3.up * camerCharacterHeightOffset;
                 Vector3 shootDir = (targetUnit.GetWorldPosition() - shooterUnit.GetWorldPosition()).normalized;
 

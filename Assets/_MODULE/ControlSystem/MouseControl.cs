@@ -17,8 +17,21 @@ public class MouseControl : MonoBehaviour
 
     public static Vector3 GetPosition()
     {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        Ray ray = Camera.main.ScreenPointToRay(InputManager.instance.GetMouseScreenPosition());
         Physics.Raycast(ray, out RaycastHit hitInfo, float.MaxValue, instance.mouseLayerMask);
         return hitInfo.point;
+    }
+    public static Vector3 GetPlaneDragPosition()
+    {
+        Plane  plane = new Plane(Vector3.up, Vector3.zero);
+
+        Ray ray = Camera.main.ScreenPointToRay(InputManager.instance.GetMouseScreenPosition());
+        float entry;
+        if(plane.Raycast(ray, out entry))
+        {
+            return ray.GetPoint(entry);
+        }
+
+        return Vector3.zero;
     }
 }

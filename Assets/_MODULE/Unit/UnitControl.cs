@@ -1,17 +1,14 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
-public class UnitControl : MonoBehaviour
+public class UnitControl : Target
 {
     [SerializeField] private const int MAX_ACTION_POINTS = 2;
     [SerializeField] private bool isEnemy = false;
     public static event EventHandler OnAnyActionChange;
     public static event EventHandler OnAnyUnitSpawned;
     public static event EventHandler OnAnyUnitDead;
-    private GridPosition gridPosition;
     private BaseAction[] baseActions;
     private HealthSystem healthSystem;
     private int actionPoint = MAX_ACTION_POINTS;
@@ -21,10 +18,9 @@ public class UnitControl : MonoBehaviour
         baseActions =  GetComponents<BaseAction>();
         healthSystem = GetComponent<HealthSystem>();
     }
-    private void Start() 
+    public override void Start() 
     {
-        gridPosition = LevelGrid.instance.GetGridPosition(transform.position);
-        LevelGrid.instance.AddUnitAtGridPosition(gridPosition, this);
+        base.Start();
         TurnSystem.instance.OnTurnChange += TurnSystem_OnTurnChange;
         healthSystem.onDead += HealthSystem_OnDead;
         StartCoroutine(CoroutineInvokeEvents());
@@ -92,11 +88,11 @@ public class UnitControl : MonoBehaviour
     {
         return isEnemy;
     }
-    public Vector3 GetWorldPosition()
+    public override Vector3 GetWorldPosition()
     {
         return gameObject.transform.position;
     }
-    public void Damage(int amount)
+    public override void Damage(int amount = 0)
     {
         healthSystem.Damage(amount);
     }
@@ -123,11 +119,12 @@ public class UnitControl : MonoBehaviour
     private void HealthSystem_OnDead(object sender, EventArgs e)
     {
         Destroy(gameObject);
-        LevelGrid.instance.RemoveUnitAtGridPosition(gridPosition, this);
+        LevelGrid.instance.RemoveTargetAtGridPosition(gridPosition, this);
         OnAnyUnitDead?.Invoke(this, EventArgs.Empty);
     }
     public float GetHealthProportion()
     {
         return healthSystem.GetHealthProportion();
     }
+
 }

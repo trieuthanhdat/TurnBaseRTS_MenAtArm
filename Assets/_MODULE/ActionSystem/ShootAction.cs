@@ -11,25 +11,27 @@ public class ShootAction : BaseAction
         Shoot,
         CoolOff
     }
+    [SerializeField] LayerMask obstacleLayerMask;
     [SerializeField] private int damageAmount  = 40;
     
     [SerializeField] private int maxShootDistance = 4;
     [SerializeField] private float rotateSpeed = 10f;
     private ShootingState state;
     private float stateTimer = 0;
-    private UnitControl targetUnit;
+    private Target targetUnit;
     private bool canShoot = false;
     public event EventHandler<OnShootEventArgs> onShoot;
+    public static event EventHandler onAnyShoot;
     public class OnShootEventArgs : EventArgs
     {
-        public UnitControl targetUnit;
-        public UnitControl shootingUnit;
+        public Target targetUnit;
+        public Target shootingUnit;
     }
     public int GetMaxShootDistance()
     {
         return maxShootDistance;
     }
-    public UnitControl GetTargetUnit()
+    public Target GetTargetUnit()
     {
         return targetUnit;
     }
@@ -67,16 +69,6 @@ public class ShootAction : BaseAction
             NextState();
         }
     }
-
-    private void Shoot()
-    {
-        onShoot?.Invoke(this, new OnShootEventArgs{
-            targetUnit = targetUnit,
-            shootingUnit = unit
-        });
-        targetUnit.Damage(damageAmount);
-    }
-
     private void NextState()
     {
         switch (state)
@@ -96,6 +88,18 @@ public class ShootAction : BaseAction
                 break;
         }
     }
+
+    private void Shoot()
+    {
+        onShoot?.Invoke(this, new OnShootEventArgs{
+            targetUnit = targetUnit,
+            shootingUnit = unit
+        });
+        onAnyShoot?.Invoke(this, EventArgs.Empty);
+        targetUnit.Damage(damageAmount);
+    }
+
+    
 
     public override string GetActionName()
     {
@@ -121,12 +125,24 @@ public class ShootAction : BaseAction
                 int tmpDistance = Mathf.Abs(x) + Mathf.Abs(z);
                 if(tmpDistance > maxShootDistance)
                     continue;
-                if(!LevelGrid.instance.HasAnyUnitOnGridPosition(testGridpos))
+                if(unit.gameObject.CompareTag("Enemy"))
+                {
+                    if(LevelGrid.instance.HasAnyDestroyableOnGridPosition(testGridpos))
+                        continue;
+                }
+                if(!LevelGrid.instance.HasAnyTargetOnGridPosition(testGridpos)) 
                     continue;
-                UnitControl targetUnit = LevelGrid.instance.GetUnitOnGridPosition(testGridpos);
-                if(targetUnit.IsEnemy() == unit.IsEnemy())
-                    continue;
+                Target targetUnit = LevelGrid.instance.GetTargetOnGridPosition(testGridpos);
+                if(targetUnit.GetComponent<UnitControl> () != null)
+                    if(targetUnit.GetComponent<UnitControl>().IsEnemy() == unit.IsEnemy()) // if Friend
+                        continue;
+                    
+                float unitShoulderHeight = 1.7f;
+                Vector3 shootDir = (targetUnit.GetWorldPosition() - unit.GetWorldPosition()).normalized;
+                if(Physics.Raycast(unit.GetWorldPosition() + Vector3.up * unitShoulderHeight, shootDir, Vector3.Distance(unit.GetWorldPosition(), targetUnit.GetWorldPosition()), obstacleLayerMask))
+                    continue; //block by obstacle
 
+                
                 listPos.Add(testGridpos);
             }
         }
@@ -134,7 +150,7 @@ public class ShootAction : BaseAction
     }
     public override void TakeAction(GridPosition gridPosition, Action onActionComplete)
     {
-        targetUnit = LevelGrid.instance.GetUnitOnGridPosition(gridPosition);
+        targetUnit = LevelGrid.instance.GetTargetOnGridPosition(gridPosition);
 
         state = ShootingState.Aim;
         canShoot = true;

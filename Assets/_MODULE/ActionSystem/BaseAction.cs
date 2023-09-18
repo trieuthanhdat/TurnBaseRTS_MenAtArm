@@ -6,7 +6,7 @@ using UnityEngine;
 public abstract class BaseAction : MonoBehaviour
 {
     public static event EventHandler OnAnyActionStarted;
-    public static event EventHandler OnActionCompleted;
+    public static event EventHandler OnAnyActionCompleted;
     public Sprite actionSprite;
     protected UnitControl unit;
     protected bool isActive = false;
@@ -42,8 +42,8 @@ public abstract class BaseAction : MonoBehaviour
     protected void ActionComplete()
     {
         isActive= false;
-        onActionComplete();
-        OnActionCompleted?.Invoke(this, EventArgs.Empty);
+        onActionComplete?.Invoke();
+        OnAnyActionCompleted?.Invoke(this, EventArgs.Empty);
     }
     public UnitControl GetUnit()
     {

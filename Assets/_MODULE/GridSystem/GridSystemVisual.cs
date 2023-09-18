@@ -24,6 +24,7 @@ public class GridSystemVisual : MonoSingleton<GridSystemVisual>
     [SerializeField] private List<GridVisualTypeMaterial> gridVisualTypeMaterials;
     [SerializeField] private Transform gridSystemVisualPrefab;
     private GridSystemVisualSingle[,] gridSystemVisualSingleArr;
+    private GridSystemVisualSingle lastSelectedGridSystemVisualSingle;
     public GridSystemVisualSingle[,] GridSystemVisualSingleArr { get => gridSystemVisualSingleArr; set => gridSystemVisualSingleArr = value; }
 
     private void Start() 
@@ -38,8 +39,32 @@ public class GridSystemVisual : MonoSingleton<GridSystemVisual>
                 gridSystemVisualSingleArr[x, z] = gridVisual.GetComponent<GridSystemVisualSingle>();
             }
         }
+       
         UnitAction.instance.OnSelectedAction += UnitAction_OnSelectedAction;
-        LevelGrid.instance.onAnyUnitMoveGridPosition += LevelGrid_OnAnyUnitMoveGridPosition;
+        DestructableBarrel.onAnyBarrelDestroy += DestructableBarrel_OnAnyDestroyablesKill;
+        LevelGrid.instance.OnAnyUnitMovedGridPosition += LevelGrid_OnAnyUnitMoveGridPosition;
+    }
+    private void Update() 
+    {
+        if(lastSelectedGridSystemVisualSingle != null)
+        {
+            lastSelectedGridSystemVisualSingle.HideSelected();
+        }
+        Vector3 mousePos = MouseControl.GetPosition();
+        GridPosition gridPosition = LevelGrid.instance.GetGridPosition(mousePos);
+        LevelGrid.instance.GetGridPosition(mousePos);
+        if(LevelGrid.instance.IsValidGridPosition(gridPosition))
+        {
+            lastSelectedGridSystemVisualSingle = gridSystemVisualSingleArr[gridPosition.x, gridPosition.z];
+        }
+        if(lastSelectedGridSystemVisualSingle != null)
+        {
+            lastSelectedGridSystemVisualSingle.ShowSelected();
+        }
+    }
+    private void DestructableBarrel_OnAnyDestroyablesKill(object sender, EventArgs e)
+    {
+        UpdateGridVisual();
     }
 
     private void LevelGrid_OnAnyUnitMoveGridPosition(object sender, EventArgs e)
@@ -70,8 +95,18 @@ public class GridSystemVisual : MonoSingleton<GridSystemVisual>
                 style = GridVisualStyle.RedSoft;
                 ShowGridPositionRange(selectedUnit.GetGridPosition(), shootAction.GetMaxShootDistance(), GridVisualStyle.Red);
                 break;
+            case GrenadeAction grenadeAction:
+                style = GridVisualStyle.Yellow;
+                break;
             case SpinAction spinAction:
                 style = GridVisualStyle.Blue;
+                break;
+            case InteractAction interactAction:
+                style = GridVisualStyle.Blue;
+                break;
+            case SwordAction swordAction:
+                style = GridVisualStyle.RedSoft;
+                ShowGridPositionRangeSquare(selectedUnit.GetGridPosition(), swordAction.GetMaxShootDistance(), GridVisualStyle.Red);
                 break;
         }
         ShowGridPositionList(baseAction.GetValidActionGridPosition(), style);
@@ -96,6 +131,22 @@ public class GridSystemVisual : MonoSingleton<GridSystemVisual>
                 if(!LevelGrid.instance.IsValidGridPosition(tmpGridPos))
                     continue;
                 if(checkDistance > range)
+                    continue;
+
+                listGridPosition.Add(tmpGridPos);
+            }
+        }
+        ShowGridPositionList(listGridPosition, gridVisualStyle);
+    }
+    private void ShowGridPositionRangeSquare(GridPosition gridPosition, int range, GridVisualStyle gridVisualStyle)
+    {
+        List<GridPosition> listGridPosition = new List<GridPosition>();
+        for(int x = -range; x <= range; x ++)
+        {
+            for(int z = -range; z <= range; z++)
+            {
+                GridPosition tmpGridPos = gridPosition + new GridPosition(x, z);
+                if(!LevelGrid.instance.IsValidGridPosition(tmpGridPos))
                     continue;
 
                 listGridPosition.Add(tmpGridPos);

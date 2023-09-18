@@ -59,7 +59,6 @@ public class GridSystem<TGridObject>
     }
     public TGridObject GetGridObject(GridPosition gridPosition)
     {
-        Debug.Log("GRID SYSTEM: getting grid object at "+ gridPosition.ToString());
         return gridObjectsArr[gridPosition.x, gridPosition.z];
     }
     public bool IsValidGridPosition(GridPosition gridPosition)

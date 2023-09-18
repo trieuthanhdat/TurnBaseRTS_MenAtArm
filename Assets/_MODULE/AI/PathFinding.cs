@@ -8,49 +8,56 @@ using UnityEngine;
 public class PathFinding : MonoSingleton<PathFinding>
 {
     [SerializeField] Transform gridDebugPrefab;
-    [SerializeField] private int width = 10;
-    [SerializeField] private int height = 10;
-    [SerializeField] private float cellSize = 2;
-    private GridSystem<PathNode> gridSystem;
+    [SerializeField] LayerMask obstacleLayerMask;
+    private int width = 10;
+    private int height = 10;
+    private float cellSize = 2;
+    private GridSystemHex<PathNode> GridSystemHex;
     private const int MOVE_STRAIGHT_COST = 10;
-    private const int MOVE_DIAGONAL_COST = 14; //This is square root of 2
-    private void Awake() 
-    {
-        gridSystem = new GridSystem<PathNode>(width, height, cellSize, (GridSystem<PathNode> g, GridPosition gridPosition) => new PathNode(gridPosition));
-        gridSystem.CreateDebugObjects(gridDebugPrefab);
-        Debug.Log("PATH FINDING: int gridsystem width = "+gridSystem.Width + " height = "+gridSystem.Height);
-    }
-    //Testing
-    private void Update() 
-    {
-        if(Input.GetKeyDown(KeyCode.T))
-        {
-            GridPosition mousePos = LevelGrid.instance.GetGridPosition(MouseControl.GetPosition());
-            GridPosition startPos = new GridPosition(0, 0);
-            List<GridPosition> gridPositions = FindPaths(startPos, mousePos);
 
-            for(int i = 0; i < gridPositions.Count - 1; i++)
+    public int GetMoveStaightCost()
+    {
+        return MOVE_STRAIGHT_COST;
+    }
+    public void Setup(int w, int h, float cellSize)
+    {
+        this.width = w;
+        this.height = h;
+        this.cellSize = cellSize;
+        GridSystemHex = new GridSystemHex<PathNode>(width, height, cellSize, (GridSystemHex<PathNode> g, GridPosition gridPosition) => new PathNode(gridPosition));
+        GridSystemHex.CreateDebugObjects(gridDebugPrefab);
+        Debug.Log("PATH FINDING: int GridSystemHex width = "+GridSystemHex.Width + " height = "+GridSystemHex.Height);
+
+        //Applying offsets 
+        for(int x = 0; x< width; x ++)
+        {
+            for(int z = 0; z < height; z ++)
             {
-                Debug.DrawLine(LevelGrid.instance.GetWorldPosition(gridPositions[i]),
-                               LevelGrid.instance.GetWorldPosition(gridPositions[i + 1]),
-                               Color.green, 10f   );
+                GridPosition gridPosition = new GridPosition(x, z);
+                Vector3 worldPos = LevelGrid.instance.GetWorldPosition(gridPosition);
+                float raycastOffset = 5f;
+                if(Physics.Raycast(worldPos + Vector3.down * raycastOffset, Vector3.up, raycastOffset * 2, obstacleLayerMask))
+                {
+                    GetNode(x, z).SetWalkable(false);
+                }
             }
         }
     }
-    public List<GridPosition> FindPaths(GridPosition startPos, GridPosition endPos)
+
+    public List<GridPosition> FindPaths(GridPosition startPos, GridPosition endPos, out int pathLength)
     {
         List<PathNode> openList = new List<PathNode>();
         List<PathNode> closedList = new List<PathNode>();
 
-        PathNode startNode = gridSystem.GetGridObject(startPos);
-        PathNode endNode = gridSystem.GetGridObject(endPos);
+        PathNode startNode = GridSystemHex.GetGridObject(startPos);
+        PathNode endNode = GridSystemHex.GetGridObject(endPos);
         openList.Add(startNode);
-        for(int x = 0; x < gridSystem.Width; x++)
+        for(int x = 0; x < GridSystemHex.Width; x++)
         {
-            for(int z = 0; z < gridSystem.Height; z++)
+            for(int z = 0; z < GridSystemHex.Height; z++)
             {
                 GridPosition gridPosition = new GridPosition(x, z);
-                PathNode pathNode = gridSystem.GetGridObject(gridPosition);
+                PathNode pathNode = GridSystemHex.GetGridObject(gridPosition);
 
                 pathNode.SetGCost(int.MaxValue);
                 pathNode.SetHCost(0);
@@ -59,14 +66,17 @@ public class PathFinding : MonoSingleton<PathFinding>
             }
         }
         startNode.SetGCost(0);
-        startNode.SetHCost(CalculateDistance(startPos, endPos));
+        startNode.SetHCost(CalculateHexDistance(startPos, endPos));
         startNode.CalculateFCost();
 
         while(openList.Count > 0)
         {
             PathNode currentNode = GetLowestFCostPathNode(openList);
             if(currentNode == endNode)
+            {
+                pathLength = endNode.GetFCost();
                 return CalculatePathNode(endNode); //Reach final node
+            }
             openList.Remove(currentNode);
             closedList.Add(currentNode);
 
@@ -76,14 +86,18 @@ public class PathFinding : MonoSingleton<PathFinding>
                 {
                     continue;
                 }
-
-                int tGCost = currentNode.GetGCost() + CalculateDistance(currentNode.GetGridPosition(), neighBour.GetGridPosition());
+                if(!neighBour.Walkable())
+                {
+                    closedList.Add(neighBour);
+                    continue;
+                }
+                int tGCost = currentNode.GetGCost() + MOVE_STRAIGHT_COST;
 
                 if(tGCost < neighBour.GetGCost())
                 {
                     neighBour.SetPreviousNode(currentNode);
                     neighBour.SetGCost(tGCost);
-                    neighBour.SetHCost(CalculateDistance(neighBour.GetGridPosition(), endPos));
+                    neighBour.SetHCost(CalculateHexDistance(neighBour.GetGridPosition(), endPos));
                     neighBour.CalculateFCost();
 
                     if(!openList.Contains(neighBour))
@@ -94,6 +108,7 @@ public class PathFinding : MonoSingleton<PathFinding>
             }
         }
         // no path found
+        pathLength = 0;
         return null;
     }
 
@@ -124,41 +139,55 @@ public class PathFinding : MonoSingleton<PathFinding>
         if(gridPosition.x - 1 >= 0)
         {
             neightbours.Add(GetNode(gridPosition.x - 1, gridPosition.z)); //Left
-            if(gridPosition.z - 1 >= 0)
-                neightbours.Add(GetNode(gridPosition.x - 1, gridPosition.z - 1)); //Left Bottom
-            if(gridPosition.z + 1 < gridSystem.Height)
-                neightbours.Add(GetNode(gridPosition.x - 1, gridPosition.z + 1)); //Left Top
+            
         }
-        if(gridPosition.x + 1 < gridSystem.Width)
+        if(gridPosition.x + 1 < GridSystemHex.Width)
         {
             neightbours.Add(GetNode(gridPosition.x + 1, gridPosition.z)); //Right
-            if(gridPosition.z - 1 >= 0)
-                neightbours.Add(GetNode(gridPosition.x + 1, gridPosition.z - 1)); //Right Bottom
-            if(gridPosition.z + 1 < gridSystem.Height)
-                neightbours.Add(GetNode(gridPosition.x + 1, gridPosition.z + 1)); //Right Top
         }
 
         if(gridPosition.z - 1 >= 0)
             neightbours.Add(GetNode(gridPosition.x, gridPosition.z - 1)); //Bottom
-        if(gridPosition.z + 1 < gridSystem.Height)
+        if(gridPosition.z + 1 < GridSystemHex.Height)
             neightbours.Add(GetNode(gridPosition.x, gridPosition.z + 1)); //Top
         
+        bool oddRow = gridPosition.z % 2 == 1;
+        if(oddRow)
+        {
+            if(gridPosition.x + 1 < GridSystemHex.Width)
+            {
+                if(gridPosition.z - 1 >= 0)
+                    neightbours.Add(GetNode(gridPosition.x + 1, gridPosition.z - 1)); //Right bot
+                if(gridPosition.z + 1 < GridSystemHex.Height)
+                    neightbours.Add(GetNode(gridPosition.x + 1, gridPosition.z + 1)); //Right top
+            }
+        }else
+        {
+            if(gridPosition.x - 1 >= 0)
+            {
+                if(gridPosition.z - 1 >= 0)
+                    neightbours.Add(GetNode(gridPosition.x - 1, gridPosition.z - 1)); //Left bot
+                if(gridPosition.z + 1 < GridSystemHex.Height)
+                    neightbours.Add(GetNode(gridPosition.x - 1, gridPosition.z + 1)); //Left top
+            }
+           
+        }
         return neightbours;
     }
 
     private PathNode GetNode(int x, int z)
     {
-        return gridSystem.GetGridObject(new GridPosition(x, z));
+        return GridSystemHex.GetGridObject(new GridPosition(x, z));
     }
 
-    public int CalculateDistance(GridPosition a, GridPosition b)
+    public int CalculateHexDistance(GridPosition a, GridPosition b)
     {
-        GridPosition distgrid = a - b;
-        int dist = Mathf.Abs(distgrid.x) + Mathf.Abs(distgrid.z);
-        int xDist = Mathf.Abs(distgrid.x);
-        int zDist = Mathf.Abs(distgrid.z);
-        int remaining = Mathf.Abs(distgrid.x - distgrid.z);
-        return MOVE_DIAGONAL_COST * Mathf.Min(xDist, zDist) + remaining * MOVE_STRAIGHT_COST;
+        return Mathf.RoundToInt(Vector3.Distance(GridSystemHex.GetWorldPosition(a), GridSystemHex.GetWorldPosition(b)) * MOVE_STRAIGHT_COST);
+        // GridPosition distgrid = a - b;
+        // int xDist = Mathf.Abs(distgrid.x);
+        // int zDist = Mathf.Abs(distgrid.z);
+        // int remaining = Mathf.Abs(distgrid.x - distgrid.z);
+        // return MOVE_STRAIGHT_COST * Mathf.Min(xDist, zDist) + remaining * MOVE_STRAIGHT_COST;
     }
     private PathNode GetLowestFCostPathNode(List<PathNode> pathNodes)
     {
@@ -171,5 +200,39 @@ public class PathFinding : MonoSingleton<PathFinding>
             }
         }
         return lowestNode;
+    }
+    public bool IsGridPositionWalkable(GridPosition gridPosition)
+    {
+        return GridSystemHex.GetGridObject(gridPosition).Walkable();
+    }
+    public void SetGridPositionWalkable(GridPosition gridPosition, bool isWalkable)
+    {
+        GridSystemHex.GetGridObject(gridPosition).SetWalkable(isWalkable);
+    }
+    public void RemoveTargetAtGridPosition()
+    {
+        
+    }
+    public bool HasValidPath(GridPosition startPosition, GridPosition endPosition)
+    {
+        return FindPaths(startPosition, endPosition, out int pathLength) != null;
+    }
+    public bool ValidatePathsAndLength(GridPosition startPosition, GridPosition endPosition, int validateLength)
+    {
+        bool isValid = false;
+        if(FindPaths(startPosition, endPosition, out int pathLength) != null)
+        {
+            if(pathLength <= validateLength)
+            {
+                Debug.Log("VALIDATE PATHS: pathlength "+pathLength + " validate legnth "+validateLength);
+                isValid = true;
+            }
+        }
+        return isValid;
+    }
+    public int GetPathLength(GridPosition startPosition, GridPosition endPosition)
+    {
+        FindPaths(startPosition, endPosition, out int pathLength);
+        return pathLength;
     }
 }
